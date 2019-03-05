@@ -1,0 +1,12 @@
+# temp files
+*~
+*.swp
+.DS_Store
+Thumbs.db
+
+# build output
+*.o
+*.dSYM
+mmu
+a.out
+
