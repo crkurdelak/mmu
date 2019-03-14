@@ -56,7 +56,7 @@ typedef struct {
 typedef struct {
     uint8_t framenum    : 4;    /**< physical page frame number */
     uint8_t present     : 1;    /**< present/absent bit */
-    uint8_t             : 1;    /* unused */
+    uint8_t set         : 1;    /**< set bit */
     uint8_t M           : 1;    /**< modified bit */
     uint8_t R           : 1;    /**< referenced bit */
 } pte_t;
@@ -102,7 +102,7 @@ void set_pte(pagetable_t* tbl, pagenum_t pagenum, pte_t pte);
 pte_t pte_clear(pagetable_t* tbl, pagenum_t pagenum);
 
 /**
- * @brief Returns 1 if the given page table entry is not set.
+ * @brief Returns 1 if the given page table entry is clear (i.e., not set).
  */
 int pte_none(const pagetable_t* tbl, pagenum_t pagenum);
 
