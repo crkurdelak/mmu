@@ -129,7 +129,7 @@ void pte_mkclean(pagetable_t* tbl, pagenum_t pagenum);
 
 
 /**
- * @brief Returns 1 if the given page has not been recently referenced.
+ * @brief Returns 1 if the given page has been recently referenced.
  */
 int pte_young(const pagetable_t* tbl, pagenum_t pagenum);
 
