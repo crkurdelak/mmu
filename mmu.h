@@ -34,9 +34,14 @@
  * @brief A 20-bit virtual address type.
  */
 typedef struct {
-    uint32_t            : 12;   /* unused */
-    uint32_t pagenum    : 8;    /**< virtual page number */
-    uint32_t offset     : 12;   /**< offset within the page */
+    union {
+        uint32_t value;                 /* allows access to all bits at once */
+        struct {
+            uint32_t            : 12;   /* unused */
+            uint32_t pagenum    : 8;    /**< virtual page number */
+            uint32_t offset     : 12;   /**< offset within the page */
+        };
+    };
 } vaddr_t;
 
 /**
@@ -44,9 +49,14 @@ typedef struct {
  * @brief A 16-bit physical address type.
  */
 typedef struct {
-    uint32_t            : 16;   /* unused */
-    uint32_t framenum   : 4;    /**< physical page frame number */
-    uint32_t offset     : 12;   /**< offset within the frame */
+    union {
+        uint32_t value;                 /* allows access to all bits at once */
+        struct {
+            uint32_t            : 16;   /* unused */
+            uint32_t framenum   : 4;    /**< physical page frame number */
+            uint32_t offset     : 12;   /**< offset within the frame */
+        };
+    };
 } addr_t;
 
 /**
