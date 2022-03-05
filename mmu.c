@@ -12,7 +12,7 @@
 pagetable_t* pagetable_alloc() {
     pagetable_t* tbl = malloc(sizeof(pagetable_t));
     if (tbl != NULL) {
-        tbl->entries = malloc(PAGETABLE_SIZE * sizeof(pte_t));
+        tbl->entries = calloc(PAGETABLE_SIZE, sizeof(pte_t));
         if (tbl->entries != NULL) {
             tbl->size = PAGETABLE_SIZE;
         }
