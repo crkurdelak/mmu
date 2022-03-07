@@ -37,9 +37,9 @@ typedef struct {
     union {
         uint32_t value;                 /* allows access to all bits at once */
         struct {
-            uint32_t            : 12;   /* unused */
-            uint32_t pagenum    : 8;    /**< virtual page number */
             uint32_t offset     : 12;   /**< offset within the page */
+            uint32_t pagenum    : 8;    /**< virtual page number */
+            uint32_t            : 12;   /* unused */
         };
     };
 } vaddr_t;
@@ -52,9 +52,9 @@ typedef struct {
     union {
         uint32_t value;                 /* allows access to all bits at once */
         struct {
-            uint32_t            : 16;   /* unused */
-            uint32_t framenum   : 4;    /**< physical page frame number */
             uint32_t offset     : 12;   /**< offset within the frame */
+            uint32_t framenum   : 4;    /**< physical page frame number */
+            uint32_t            : 16;   /* unused */
         };
     };
 } addr_t;
@@ -64,11 +64,11 @@ typedef struct {
  * @brief An 8-bit page table entry type.
  */
 typedef struct {
-    uint8_t framenum    : 4;    /**< physical page frame number */
-    uint8_t present     : 1;    /**< present/absent bit */
-    uint8_t set         : 1;    /**< set bit */
-    uint8_t M           : 1;    /**< modified bit */
     uint8_t R           : 1;    /**< referenced bit */
+    uint8_t M           : 1;    /**< modified bit */
+    uint8_t set         : 1;    /**< set bit */
+    uint8_t present     : 1;    /**< present/absent bit */
+    uint8_t framenum    : 4;    /**< physical page frame number */
 } pte_t;
 
 /**
