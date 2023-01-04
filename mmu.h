@@ -26,8 +26,9 @@
 #include <stdlib.h>
 
 #define PAGETABLE_SIZE  (1UL << 8)
-#define PAGE_SHIFT      12
-#define PAGE_SIZE       (1UL << PAGE_SHIFT)
+#define PAGE_SIZE       (1UL << 12)
+#define PAGE_FRAMES     (1UL << 4)
+
 
 /**
  * @struct vaddr_t
@@ -35,11 +36,11 @@
  */
 typedef struct {
     union {
-        uint32_t value;                 /* allows access to all bits at once */
+        uint32_t value;                /* allows access to all bits at once */
         struct {
-            uint32_t offset     : 12;   /**< offset within the page */
-            uint32_t pagenum    : 8;    /**< virtual page number */
-            uint32_t            : 12;   /* unused */
+            uint32_t offset     : 12;  /**< offset within the page */
+            uint32_t pagenum    : 8;   /**< virtual page number */
+            uint32_t            : 12;  /* unused */
         };
     };
 } vaddr_t;
@@ -50,25 +51,26 @@ typedef struct {
  */
 typedef struct {
     union {
-        uint32_t value;                 /* allows access to all bits at once */
+        uint32_t value;                /* allows access to all bits at once */
         struct {
-            uint32_t offset     : 12;   /**< offset within the frame */
-            uint32_t framenum   : 4;    /**< physical page frame number */
-            uint32_t            : 16;   /* unused */
+            uint32_t offset     : 12;  /**< offset within the frame */
+            uint32_t framenum   : 4;   /**< physical page frame number */
+            uint32_t            : 16;  /* unused */
         };
     };
 } addr_t;
 
 /**
  * @struct pte_t
- * @brief An 8-bit page table entry type.
+ * @brief A 16-bit page table entry type.
  */
 typedef struct {
-    uint8_t R           : 1;    /**< referenced bit */
-    uint8_t M           : 1;    /**< modified bit */
-    uint8_t set         : 1;    /**< set bit */
-    uint8_t present     : 1;    /**< present/absent bit */
-    uint8_t framenum    : 4;    /**< physical page frame number */
+    uint16_t age         : 8;  /**< aging counter */
+    uint16_t R           : 1;  /**< referenced bit */
+    uint16_t M           : 1;  /**< modified bit */
+    uint16_t set         : 1;  /**< set bit */
+    uint16_t present     : 1;  /**< present/absent bit */
+    uint16_t framenum    : 4;  /**< physical page frame number */
 } pte_t;
 
 /**
@@ -77,13 +79,37 @@ typedef struct {
  * @see pagetable_alloc(), pagetable_free().
  */
 typedef struct {
-    pte_t* entries;             /**< page table entries */
-    size_t size;                /**< number of page table entries */
+    pte_t* entries;    /**< page table entries */
+    size_t size;       /**< number of page table entries */
 } pagetable_t;
 
+/** A page number type. */
 typedef uint8_t pagenum_t;
+
+/** A frame number type. */
 typedef uint8_t framenum_t;
 
+/**
+ * @struct page_t
+ * @brief A page type, consisting of a fixed amount of bytes.
+ */
+typedef struct {
+    uint8_t bytes[PAGE_SIZE];  /**< the bytes of the page */
+} page_t;
+
+/** A frame type, equivalent to a page type. */
+typedef page_t frame_t;
+
+
+/**
+ * @brief Initializes the pseudo-physical memory frames.
+ */
+frame_t* mm_mem_init();
+
+/**
+ * @brief Destroys the pseudo-physical memory frames.
+ */
+void mm_mem_destroy();
 
 /**
  * @brief Dynamically allocates a new page table.
@@ -151,7 +177,7 @@ void pte_mkyoung(pagetable_t* tbl, pagenum_t pagenum);
 /**
  * @brief Clears the referenced bit for the given page.
  */
-void pte_old(pagetable_t* tbl, pagenum_t pagenum);
+void pte_mkold(pagetable_t* tbl, pagenum_t pagenum);
 
 
 /**
