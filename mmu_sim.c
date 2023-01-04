@@ -19,5 +19,5 @@ int main() {
     pagetable_free(pagetable);
     mm_mem_destroy();
 
-    return EXIT_SUCCESS;
+    exit(EXIT_SUCCESS);
 }
