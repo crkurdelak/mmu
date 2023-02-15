@@ -50,3 +50,62 @@ void pagetable_free(pagetable_t* tbl) {
         free(tbl);
     }
 }
+
+pte_t mk_pte(framenum_t framenum) {
+    pte_t result;
+    return result;
+}
+
+void set_pte(pagetable_t *tbl, pagenum_t pagenum, pte_t pte) {
+
+}
+
+pte_t pte_clear(pagetable_t *tbl, pagenum_t pagenum) {
+    pte_t result;
+    return result;
+}
+
+int pte_none(const pagetable_t *tbl, pagenum_t pagenum) {
+    return 0;
+}
+
+int pte_present(const pagetable_t *tbl, pagenum_t pagenum) {
+    // look up the page's entry in the pagetable
+    pte_t entry = tbl->entries[pagenum];
+    // look at the present/absent bit in the entry
+    return entry.present;
+}
+
+int pte_dirty(const pagetable_t *tbl, pagenum_t pagenum) {
+    return 0;
+}
+
+void pte_mkdirty(pagetable_t *tbl, pagenum_t pagenum) {
+
+}
+
+void pte_mkclean(pagetable_t *tbl, pagenum_t pagenum) {
+
+}
+
+int pte_young(const pagetable_t *tbl, pagenum_t pagenum) {
+    return 0;
+}
+
+void pte_mkyoung(pagetable_t *tbl, pagenum_t pagenum) {
+
+}
+
+void pte_mkold(pagetable_t *tbl, pagenum_t pagenum) {
+
+}
+
+pte_t pte_val(pagetable_t *tbl, pagenum_t pagenum) {
+    pte_t result;
+    return result;
+}
+
+addr_t pagetable_translate(const pagetable_t *tbl, const vaddr_t vaddr) {
+    addr_t result;
+    return result;
+}
