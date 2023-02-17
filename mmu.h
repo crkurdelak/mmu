@@ -68,7 +68,7 @@ typedef struct {
     uint16_t age         : 8;  /**< aging counter */
     uint16_t R           : 1;  /**< referenced bit */
     uint16_t M           : 1;  /**< modified bit */
-    uint16_t set         : 1;  /**< set bit */
+    uint16_t set         : 1;  /**< set bit (valid bit) */
     uint16_t present     : 1;  /**< present/absent bit */
     uint16_t framenum    : 4;  /**< physical page frame number */
 } pte_t;
@@ -103,6 +103,7 @@ typedef page_t frame_t;
 
 /**
  * @brief Initializes the pseudo-physical memory frames.
+ * @return TODO return value
  */
 frame_t* mm_mem_init();
 
@@ -113,81 +114,116 @@ void mm_mem_destroy();
 
 /**
  * @brief Dynamically allocates a new page table.
+ * @return a pointer to the new page table
  */
 pagetable_t* pagetable_alloc();
 
 /**
  * @brief Frees the specified page table from memory.
+ * @param tbl the page table to be freed from memory
  */
 void pagetable_free(pagetable_t* tbl);
 
 
 /**
  * @brief Makes a new page table entry.
+ * @return the new page table entry
  */
 pte_t mk_pte(framenum_t framenum);
 
 /**
  * @brief Sets the page table entry for the given virtual page number.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
+ * @param pte the page table entry to be set
  */
 void set_pte(pagetable_t* tbl, pagenum_t pagenum, pte_t pte);
 
 /**
  * @brief Clears the page table entry for the given virtual page number.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number of the page to be cleared
+ * @return the cleared page table entry
  */
 pte_t pte_clear(pagetable_t* tbl, pagenum_t pagenum);
 
 /**
  * @brief Returns 1 if the given page table entry is clear (i.e., not set).
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
+ * @return 1 if the given page table entry is clear
  */
 int pte_none(const pagetable_t* tbl, pagenum_t pagenum);
 
 /**
  * @brief Returns 1 if the given page is present.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
+ * @return 1 if the given page is present
  */
 int pte_present(const pagetable_t* tbl, pagenum_t pagenum);
 
 
 /**
  * @brief Returns 1 if the given page is modified.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
+ * @return 1 if the given page is modified
  */
 int pte_dirty(const pagetable_t* tbl, pagenum_t pagenum);
 
 /**
  * @brief Sets the modified bit for the given page.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
  */
 void pte_mkdirty(pagetable_t* tbl, pagenum_t pagenum);
 
 /**
  * @brief Clears the modified bit for the given page.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
  */
 void pte_mkclean(pagetable_t* tbl, pagenum_t pagenum);
 
 
 /**
  * @brief Returns 1 if the given page has been recently referenced.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
+ * @return 1 if the given page has been recently referenced
  */
 int pte_young(const pagetable_t* tbl, pagenum_t pagenum);
 
 /**
  * @brief Sets the referenced bit for the given page.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
  */
 void pte_mkyoung(pagetable_t* tbl, pagenum_t pagenum);
 
 /**
  * @brief Clears the referenced bit for the given page.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
  */
 void pte_mkold(pagetable_t* tbl, pagenum_t pagenum);
 
 
 /**
  * @brief Returns the specified page table entry.
+ * @param tbl a pointer to the page table
+ * @param pagenum the virtual page number
+ * @return the specified page table entry
  */
 pte_t pte_val(pagetable_t* tbl, pagenum_t pagenum);
 
 
 /**
  * @brief Translates a virtual address to a physical address.
+ * @param tbl a pointer to the page table
+ * @param vaddr the virtual address
+ * @return the physical address corresponding to the given virtual address
  */
 addr_t pagetable_translate(const pagetable_t* tbl, const vaddr_t vaddr);
 
