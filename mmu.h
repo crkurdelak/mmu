@@ -69,7 +69,7 @@ typedef struct {
     uint16_t R           : 1;  /**< referenced bit */
     uint16_t M           : 1;  /**< modified bit */
     uint16_t set         : 1;  /**< set bit (valid bit) */
-    uint16_t present     : 1;  /**< present/absent bit */
+    uint16_t present     : 1;  /**< present/absent bit (1 if it is in a frame) */
     uint16_t framenum    : 4;  /**< physical page frame number */
 } pte_t;
 
@@ -103,7 +103,7 @@ typedef page_t frame_t;
 
 /**
  * @brief Initializes the pseudo-physical memory frames.
- * @return TODO return value
+ * @return a pointer to the first memory frame
  */
 frame_t* mm_mem_init();
 
@@ -132,7 +132,7 @@ void pagetable_free(pagetable_t* tbl);
 pte_t mk_pte(framenum_t framenum);
 
 /**
- * @brief Sets the page table entry for the given virtual page number.
+ * @brief Sets the page table entry in the page table for the given virtual page number.
  * @param tbl a pointer to the page table
  * @param pagenum the virtual page number
  * @param pte the page table entry to be set

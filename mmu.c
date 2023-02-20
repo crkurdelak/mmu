@@ -56,8 +56,9 @@ pte_t mk_pte(framenum_t framenum) {
     result.age = 0;
     result.R = 0;       // has not been referenced yet
     result.M = 0;
-    result.set = 0;     // TODO check if this is right
-    result.present = 0; // TODO check if tis is right
+    result.set = 0;
+    // the page is not yet in a frame
+    result.present = 0;
     result.framenum = framenum;
     return result;
 }
@@ -65,25 +66,26 @@ pte_t mk_pte(framenum_t framenum) {
 void set_pte(pagetable_t *tbl, pagenum_t pagenum, pte_t pte) {
     pte.framenum = pagenum;
     pte.set = 1;            // entry has been set
-    pte.present = 1;
-    pte.M = 1;
+    pte.present = 0;        // the page is not yet in a frame
+    pte.M = 0;              // not yet modified
     tbl->entries[pagenum] = pte;
 }
 
 pte_t pte_clear(pagetable_t *tbl, pagenum_t pagenum) {
-    pte_t result;
-    result = tbl->entries[pagenum];     // get the entry
-    result.age = 0;
-    result.R = 0;
-    result.M = 0;
-    result.set = 0;
-    result.present = 0;
-    // TODO find out what to do with framenum
-    return result;
+    pte_t old_page = tbl->entries[pagenum]; // copy of page
+    pte_t* result;
+    result = &tbl->entries[pagenum];     // get pointer to the entry
+    // reset everything
+    result->age = 0;
+    result->R = 0;
+    result->M = 0;
+    result->set = 0;
+    result->present = 0;
+    return old_page;
 }
 
 int pte_none(const pagetable_t *tbl, pagenum_t pagenum) {
-    return tbl->entries[pagenum].set;
+    return !(tbl->entries[pagenum].set);
 }
 
 int pte_present(const pagetable_t *tbl, pagenum_t pagenum) {
@@ -126,5 +128,11 @@ pte_t pte_val(pagetable_t *tbl, pagenum_t pagenum) {
 addr_t pagetable_translate(const pagetable_t *tbl, const vaddr_t vaddr) {
     addr_t result;
     // TODO translate
+    // offset stays the same
+    // translate 8 bit virtual pagenum to 4 bit physical framenum
+    // get page table entry of pagenum
+    // ask its framenum and return it
+    // result.framenum = entry.framenum
+    // offset = other offest
     return result;
 }
