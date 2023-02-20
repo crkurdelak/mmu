@@ -2,7 +2,7 @@
  * @file mmu_sim.c
  * @brief A memory management unit (MMU) simulation.
  *
- * @author Brian R. Snider (bsnider@georgefox.edu)
+ * @author ckurdelak20@georgefox.edu
  */
 
 #include <stdlib.h>

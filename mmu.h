@@ -15,7 +15,7 @@
  *
  * TODO fully document each method
  *
- * @author Brian R. Snider (bsnider@georgefox.edu)
+ * @author ckurdelak20@georgefox.edu
  */
 
 #ifndef MMU_H
