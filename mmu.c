@@ -127,12 +127,18 @@ pte_t pte_val(pagetable_t *tbl, pagenum_t pagenum) {
 
 addr_t pagetable_translate(const pagetable_t *tbl, const vaddr_t vaddr) {
     addr_t result;
-    // TODO translate
+
     // offset stays the same
     // translate 8 bit virtual pagenum to 4 bit physical framenum
+
     // get page table entry of pagenum
+    pte_t* pt_entry = &tbl->entries[vaddr.pagenum];
     // ask its framenum and return it
     // result.framenum = entry.framenum
-    // offset = other offest
+    result.framenum = pt_entry->framenum;
+
+    // offset = other offset
+    result.offset = vaddr.offset;
+
     return result;
 }
