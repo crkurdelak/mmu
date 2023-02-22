@@ -24,6 +24,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define PAGETABLE_SIZE  (1UL << 8)
 #define PAGE_SIZE       (1UL << 12)
@@ -107,16 +108,28 @@ typedef page_t frame_t;
  */
 frame_t* mm_mem_init();
 
+
 /**
  * @brief Destroys the pseudo-physical memory frames.
  */
 void mm_mem_destroy();
+
+
+/**
+ * Initializes a backing page file of size PAGETABLE_SIZE × PAGE_SIZE bytes on disk as one
+ * logical file, and returns true if the page file was created successfully.
+ * @param pagefile the filename of the page file to be initialized
+ * @return true if the page file was created successfully, else returns false
+ */
+bool mm_vmem_init(char* pagefile);
+
 
 /**
  * @brief Dynamically allocates a new page table.
  * @return a pointer to the new page table
  */
 pagetable_t* pagetable_alloc();
+
 
 /**
  * @brief Frees the specified page table from memory.
@@ -226,5 +239,36 @@ pte_t pte_val(pagetable_t* tbl, pagenum_t pagenum);
  * @return the physical address corresponding to the given virtual address
  */
 addr_t pagetable_translate(const pagetable_t* tbl, const vaddr_t vaddr);
+
+
+/**
+ * Writes the specified page from the page frame to the backing page file and clears the page's R
+ * and M bits, so that some page replacement algorithm might now use the frame.
+ * @param pagefile the page file to be written to
+ * @param tbl the page table
+ * @param pagenum the number of the page to be evicted
+ */
+void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum);
+
+
+/**
+ * Loads the specified page from the backing page file to the corresponding page frame per the
+ * page's page table entry.
+ * @param pagefile the page file containing the page to be loaded
+ * @param tbl the page table
+ * @param pagenum the number of the page to be loaded
+ */
+void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum);
+
+
+/**
+ * Returns a pointer to the page frame containing the page, according to the specified page
+ * number's corresponding page table entry.
+ * @param pagefile the page file
+ * @param tbl the page table
+ * @param pagenum the number of the page to be located
+ * @return
+ */
+frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum);
 
 #endif /* MMU_H */

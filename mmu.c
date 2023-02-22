@@ -9,6 +9,25 @@
 #include <stdlib.h>
 #include "mmu.h"
 
+/**
+ * @struct fte_t
+ * @brief A 16-bit frame table entry type.
+ */
+typedef struct {
+    uint16_t occupied    : 1;  /**< occupied/unoccupied bit (1 if frame is occupied) */
+    uint16_t pagenum     : 4;  /**< virtual page number */
+} fte_t;
+
+/**
+ * @struct frametable_t
+ * @brief A frame table type, consisting of many frame table entries.
+ * @see frametable_alloc(), frametable_free().
+ */
+typedef struct {
+    fte_t* entries;    /**< frame table entries */
+    size_t size;       /**< number of page table entries */
+} frametable_t;
+
 /* the pseudo-physical memory frames; globally accessible to the MMU */
 frame_t* mem_frames;
 
@@ -25,6 +44,18 @@ void mm_mem_destroy() {
     if (mem_frames != NULL) {
         free(mem_frames);
     }
+}
+
+bool mm_vmem_init(char* pagefile) {
+    // TODO implement mm_vmem_init
+    /*
+     * This function will be used to initialize a 256 page × 4KB/page = 1024KB = 1MB page file.
+     * Note: these pages should not actually appear in memory (yet), only on disk.  The contents
+     * of each page should initially be all zeroes.  Each time the simulation program is run, the
+     * page file should be overwritten, to simulate a cold start of actual hardware without
+     * hibernation.
+     */
+    return false;
 }
 
 pagetable_t* pagetable_alloc() {
@@ -48,6 +79,38 @@ void pagetable_free(pagetable_t* tbl) {
         free(tbl);
     }
 }
+
+/**
+ * @brief Dynamically allocates a new frame table.
+ * @return a pointer to the new frame table
+ */
+frametable_t* frametable_alloc(){
+    frametable_t* tbl = malloc(sizeof(frametable_t));
+    if (tbl != NULL) {
+        tbl->entries = calloc(PAGETABLE_SIZE, sizeof(pte_t));
+        if (tbl->entries != NULL) {
+            tbl->size = PAGETABLE_SIZE;
+        }
+        else {
+            free(tbl);
+            tbl = NULL;
+        }
+    }
+    return tbl;
+}
+
+
+/**
+ * @brief Frees the specified frame table from memory.
+ * @param tbl the frame table to be freed from memory
+ */
+void frametable_free(frametable_t* tbl){
+    if (tbl != NULL) {
+        free(tbl->entries);
+        free(tbl);
+    }
+}
+
 
 pte_t mk_pte(framenum_t framenum) {
     pte_t result;
@@ -143,4 +206,37 @@ addr_t pagetable_translate(const pagetable_t *tbl, const vaddr_t vaddr) {
     result.offset = vaddr.offset;
 
     return result;
+}
+
+void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
+    // TODO implement mm_page_evict
+}
+
+void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
+    // TODO implement mm_page_load
+    /*
+     * This method should handle the following conditions:
+
+     * If the page does not have an entry in the page table (i.e., the entry's set bit is 0), make
+     and set an entry for the next available frame number, then load the page into the frame.
+
+     * If the page does have an entry in the page table, but the requested frame number is
+     occupied, the existing frame should be evicted, the new page loaded, and the page table
+     entries updated accordingly. N.B.: multiple pages might be mapped to the same frame;
+     however, only one of those pages at a time should ever be marked as present.
+     */
+}
+
+frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
+    // TODO implement pte_page
+
+    /*
+     * This method should handle the following conditions:
+
+     * If the specified page is present, return a pointer to the corresponding page frame in the
+     pseudo-physical memory buffer.
+
+     * If the specified page is not present, simulate a page fault by evicting the current page
+     (if any) and loading the requested page, then proceeding per the previous point.
+     */
 }
