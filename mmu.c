@@ -225,6 +225,22 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
      entries updated accordingly. N.B.: multiple pages might be mapped to the same frame;
      however, only one of those pages at a time should ever be marked as present.
      */
+
+    pte_t* current_pte = &(tbl->entries[pagenum]);
+    if(current_pte->set == 0) {
+        // make and set entry for next available frame number
+        // load pg into frame
+    }
+    else {
+        fte_t* requested_fte = &(frametable->entries[pagenum]);
+        if (requested_fte->occupied == 1) {
+            // evict existing frame
+            // load new pg
+            // mark it as present
+            // update pg table entries
+        }
+    }
+
 }
 
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
@@ -239,4 +255,10 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
      * If the specified page is not present, simulate a page fault by evicting the current page
      (if any) and loading the requested page, then proceeding per the previous point.
      */
+
+    pte_t* current_pte = &(tbl->entries[pagenum]);
+    if (current_pte->present == 0) {
+        // simulate pg fault by evicting current pg (if any) and loading requested pg
+    }
+    // return ptr to corresponding pg frame in pseudo-physical mem buffer
 }
