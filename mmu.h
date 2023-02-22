@@ -69,7 +69,7 @@ typedef struct {
     uint16_t R           : 1;  /**< referenced bit */
     uint16_t M           : 1;  /**< modified bit */
     uint16_t set         : 1;  /**< set bit (valid bit) */
-    uint16_t present     : 1;  /**< present/absent bit (1 if it is in a frame) */
+    uint16_t present     : 1;  /**< present/absent bit (1 if page is in a frame) */
     uint16_t framenum    : 4;  /**< physical page frame number */
 } pte_t;
 

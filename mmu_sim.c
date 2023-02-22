@@ -36,17 +36,37 @@ int main() {
     }
 
     // Read 1 byte starting at virtual address 0000 0101 0000 0000 0000
-    vaddr_t v_start_addr = 0000 0101 0000 0000 0000;
+    vaddr_t v_start_addr = {0b00000101000000000000};
     addr_t p_start_addr = pagetable_translate(pagetable, v_start_addr);
-    pte_t current_frame = pagetable->entries[p_start_addr.framenum];
-    pte_mkyoung(pagetable, current_frame.framenum);
+    pte_t current_entry = pagetable->entries[p_start_addr.framenum];
+    pte_mkyoung(pagetable, current_entry.framenum);
 
     // Read 4096 bytes sequentially starting at virtual address 0110 0100 0100 0000 0000
+    v_start_addr.value = 0b01100100010000000000;
+    for (int i = 0; i < 4096; i++) {
+        p_start_addr = pagetable_translate(pagetable, v_start_addr);
+        current_entry = pagetable->entries[p_start_addr.framenum];
+        pte_mkyoung(pagetable, current_entry.framenum);
+        v_start_addr.value += 0b1;
+    }
+
     // Write 4 bytes sequentially starting at virtual address 0010 1010 0000 0010 1010
+    v_start_addr.value = 0b00101010000000101010;
+    for (int i = 0; i < 4; i++) {
+        p_start_addr = pagetable_translate(pagetable, v_start_addr);
+        current_entry = pagetable->entries[p_start_addr.framenum];
+        pte_mkdirty(pagetable, current_entry.framenum);
+        v_start_addr.value += 0b1;
+    }
+
 
     // Evict virtual page 102
+    // if dirty, write to disk
+    if(pte_dirty(pagetable, 102)) {
+        // TODO write to disk
+    }
     // take it out of its frame
-    // set present bit to 0
+    pte_clear(pagetable, 102);
 
     // Free page table
     pagetable_free(pagetable);

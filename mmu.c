@@ -2,8 +2,6 @@
  * @file mmu.c
  * @brief MMU API implementation.
  *
- * TODO implement all MMU API methods
- *
  * @author ckurdelak20@georgefox.edu
  */
 
@@ -85,7 +83,11 @@ pte_t pte_clear(pagetable_t *tbl, pagenum_t pagenum) {
 }
 
 int pte_none(const pagetable_t *tbl, pagenum_t pagenum) {
-    return !(tbl->entries[pagenum].set);
+    int result = 1;
+    if (tbl->entries[pagenum].set) {
+        result = 0;
+    }
+    return result;
 }
 
 int pte_present(const pagetable_t *tbl, pagenum_t pagenum) {
