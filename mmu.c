@@ -55,7 +55,22 @@ bool mm_vmem_init(char* pagefile) {
      * page file should be overwritten, to simulate a cold start of actual hardware without
      * hibernation.
      */
-    return false;
+
+    bool success = false;
+    int filesize = PAGETABLE_SIZE * PAGE_SIZE;
+    // open new pagefile in binary mode
+    FILE *pg_file = fopen(pagefile, "wb");
+    if (pg_file != NULL) {
+        // make contents of pages all zeros
+        for (int i = 0; i < filesize; i++) {
+            // write to the file
+            fputc(0, pg_file);
+            // advance file pointer
+            fseek(pg_file, 1, SEEK_CUR);
+        }
+    }
+
+    return success;
 }
 
 pagetable_t* pagetable_alloc() {
@@ -125,7 +140,7 @@ pte_t mk_pte(framenum_t framenum) {
 }
 
 void set_pte(pagetable_t *tbl, pagenum_t pagenum, pte_t pte) {
-    pte.framenum = pagenum;
+    pte.framenum = pagenum; // TODO fix
     pte.set = 1;            // entry has been set
     pte.present = 0;        // the page is not yet in a frame
     pte.M = 0;              // not yet modified
@@ -169,7 +184,7 @@ void pte_mkdirty(pagetable_t *tbl, pagenum_t pagenum) {
 }
 
 void pte_mkclean(pagetable_t *tbl, pagenum_t pagenum) {
-    tbl->entries[pagenum].M = 1;
+    tbl->entries[pagenum].M = 0;
 }
 
 int pte_young(const pagetable_t *tbl, pagenum_t pagenum) {
