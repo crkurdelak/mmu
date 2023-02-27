@@ -31,12 +31,16 @@ typedef struct {
 /* the pseudo-physical memory frames; globally accessible to the MMU */
 frame_t* mem_frames;
 
+/* the frame table */
+frametable_t frametable;
+
 frame_t* mm_mem_init() {
     if (mem_frames != NULL) {
         fprintf(stderr, "simulation aborted\n");
         abort();
     }
     mem_frames = calloc(PAGE_FRAMES, PAGE_SIZE);
+    // call fram table init
     return mem_frames;
 }
 
@@ -47,7 +51,6 @@ void mm_mem_destroy() {
 }
 
 bool mm_vmem_init(char* pagefile) {
-    // TODO implement mm_vmem_init
     /*
      * This function will be used to initialize a 256 page × 4KB/page = 1024KB = 1MB page file.
      * Note: these pages should not actually appear in memory (yet), only on disk.  The contents
@@ -66,7 +69,7 @@ bool mm_vmem_init(char* pagefile) {
             // write to the file
             fputc(0, pg_file);
             // advance file pointer
-            fseek(pg_file, 1, SEEK_CUR);
+            //fseek(pg_file, 1, SEEK_CUR);
         }
     }
 
@@ -140,10 +143,7 @@ pte_t mk_pte(framenum_t framenum) {
 }
 
 void set_pte(pagetable_t *tbl, pagenum_t pagenum, pte_t pte) {
-    pte.framenum = pagenum; // TODO fix
     pte.set = 1;            // entry has been set
-    pte.present = 0;        // the page is not yet in a frame
-    pte.M = 0;              // not yet modified
     tbl->entries[pagenum] = pte;
 }
 
@@ -225,6 +225,13 @@ addr_t pagetable_translate(const pagetable_t *tbl, const vaddr_t vaddr) {
 
 void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // TODO implement mm_page_evict
+    // if modified, write back to disk
+    // open file
+    // seek to right spot
+    // write page from frame starting at that spot
+
+    // update pte for this page (present = 0)
+    // remove from memory
 }
 
 void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
@@ -241,20 +248,24 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
      however, only one of those pages at a time should ever be marked as present.
      */
 
+    // look at pte for this pgnum and figure out which pg frame
     pte_t* current_pte = &(tbl->entries[pagenum]);
     if(current_pte->set == 0) {
         // make and set entry for next available frame number
-        // load pg into frame
     }
     else {
-        fte_t* requested_fte = &(frametable->entries[pagenum]);
+        fte_t* requested_fte = &(frametable.entries[pagenum]);
         if (requested_fte->occupied == 1) {
             // evict existing frame
-            // load new pg
-            // mark it as present
-            // update pg table entries
         }
     }
+
+    // open file
+    // seek to correct pg num
+    // read 4k bytes for page
+    // put bytes into page frame
+    // mark as present
+    // reset necessary bits
 
 }
 
@@ -274,6 +285,8 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     pte_t* current_pte = &(tbl->entries[pagenum]);
     if (current_pte->present == 0) {
         // simulate pg fault by evicting current pg (if any) and loading requested pg
+        // call evict
+        // call load
     }
     // return ptr to corresponding pg frame in pseudo-physical mem buffer
 }
