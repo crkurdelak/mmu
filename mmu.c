@@ -25,14 +25,34 @@ typedef struct {
  */
 typedef struct {
     fte_t* entries;    /**< frame table entries */
-    size_t size;       /**< number of page table entries */
+    size_t size;       /**< number of frame table entries */
 } frametable_t;
 
 /* the pseudo-physical memory frames; globally accessible to the MMU */
 frame_t* mem_frames;
 
 /* the frame table */
-frametable_t frametable;
+frametable_t* frametable;
+
+/**
+ * @brief Dynamically allocates a new frame table.
+ * @return a pointer to the new frame table
+ */
+frametable_t* frametable_alloc(){
+    frametable_t* tbl = malloc(sizeof(frametable_t));
+    if (tbl != NULL) {
+        tbl->entries = calloc(PAGETABLE_SIZE, sizeof(pte_t));
+        if (tbl->entries != NULL) {
+            tbl->size = PAGETABLE_SIZE;
+        }
+        else {
+            free(tbl);
+            tbl = NULL;
+        }
+    }
+    return tbl;
+}
+
 
 frame_t* mm_mem_init() {
     if (mem_frames != NULL) {
@@ -40,9 +60,13 @@ frame_t* mm_mem_init() {
         abort();
     }
     mem_frames = calloc(PAGE_FRAMES, PAGE_SIZE);
-    // call fram table init
+
+    // initialize frame table
+    frametable = frametable_alloc();
+
     return mem_frames;
 }
+
 
 void mm_mem_destroy() {
     if (mem_frames != NULL) {
@@ -68,8 +92,6 @@ bool mm_vmem_init(char* pagefile) {
         for (int i = 0; i < filesize; i++) {
             // write to the file
             fputc(0, pg_file);
-            // advance file pointer
-            //fseek(pg_file, 1, SEEK_CUR);
         }
     }
 
@@ -96,25 +118,6 @@ void pagetable_free(pagetable_t* tbl) {
         free(tbl->entries);
         free(tbl);
     }
-}
-
-/**
- * @brief Dynamically allocates a new frame table.
- * @return a pointer to the new frame table
- */
-frametable_t* frametable_alloc(){
-    frametable_t* tbl = malloc(sizeof(frametable_t));
-    if (tbl != NULL) {
-        tbl->entries = calloc(PAGETABLE_SIZE, sizeof(pte_t));
-        if (tbl->entries != NULL) {
-            tbl->size = PAGETABLE_SIZE;
-        }
-        else {
-            free(tbl);
-            tbl = NULL;
-        }
-    }
-    return tbl;
 }
 
 
@@ -223,70 +226,79 @@ addr_t pagetable_translate(const pagetable_t *tbl, const vaddr_t vaddr) {
     return result;
 }
 
+/**
+ * A helper function that returns the frame corresponding to the specified page number
+ * @param tbl the page table
+ * @param pagenum the specified page number
+ * @return the frame corresponding to the specified page number
+ */
+frame_t* get_frame(pagetable_t* tbl, pagenum_t pagenum) {
+    int current_framenum = (tbl->entries[pagenum].framenum);
+    return &(mem_frames[current_framenum]);
+}
+
 void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // TODO implement mm_page_evict
+    pte_t* current_pte = &tbl->entries[pagenum];
     // if modified, write back to disk
-    // open file
-    // seek to right spot
-    // write page from frame starting at that spot
+    if (current_pte->M == 1) {
+        frame_t* current_frame = get_frame(tbl, pagenum);
+
+        // open file
+        FILE *pg_file = fopen(pagefile, "wb");
+        // seek to correct pg num
+        fseek(pg_file, PAGE_SIZE * pagenum, SEEK_SET);
+        // write page from frame starting at that spot
+        fwrite(current_frame, 1, PAGE_SIZE, pg_file);
+    }
 
     // update pte for this page (present = 0)
     // remove from memory
 }
 
 void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
-    // TODO implement mm_page_load
-    /*
-     * This method should handle the following conditions:
-
-     * If the page does not have an entry in the page table (i.e., the entry's set bit is 0), make
-     and set an entry for the next available frame number, then load the page into the frame.
-
-     * If the page does have an entry in the page table, but the requested frame number is
-     occupied, the existing frame should be evicted, the new page loaded, and the page table
-     entries updated accordingly. N.B.: multiple pages might be mapped to the same frame;
-     however, only one of those pages at a time should ever be marked as present.
-     */
-
     // look at pte for this pgnum and figure out which pg frame
     pte_t* current_pte = &(tbl->entries[pagenum]);
+
     if(current_pte->set == 0) {
         // make and set entry for next available frame number
+        // TODO get next available frame number
+        pte_t new_pte = mk_pte(framenum);
+        set_pte(tbl, pagenum, new_pte);
     }
     else {
-        fte_t* requested_fte = &(frametable.entries[pagenum]);
+        fte_t* requested_fte = &(frametable->entries[pagenum]);
         if (requested_fte->occupied == 1) {
             // evict existing frame
+            mm_page_evict(pagefile, tbl, pagenum);
         }
     }
 
+    frame_t* current_frame = get_frame(tbl, pagenum);
+
     // open file
+    FILE *pg_file = fopen(pagefile, "wb");
     // seek to correct pg num
+    fseek(pg_file, PAGE_SIZE * pagenum, SEEK_SET);
     // read 4k bytes for page
     // put bytes into page frame
+    fread(current_frame, 1, PAGE_SIZE, pg_file);
     // mark as present
+    current_pte->present = 1;
     // reset necessary bits
-
+    current_pte->M = 0;
+    current_pte->R = 0;
 }
 
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
-    // TODO implement pte_page
-
-    /*
-     * This method should handle the following conditions:
-
-     * If the specified page is present, return a pointer to the corresponding page frame in the
-     pseudo-physical memory buffer.
-
-     * If the specified page is not present, simulate a page fault by evicting the current page
-     (if any) and loading the requested page, then proceeding per the previous point.
-     */
-
     pte_t* current_pte = &(tbl->entries[pagenum]);
     if (current_pte->present == 0) {
         // simulate pg fault by evicting current pg (if any) and loading requested pg
         // call evict
+        mm_page_evict(pagefile, tbl, pagenum);
         // call load
+        mm_page_load(pagefile, tbl, pagenum);
     }
     // return ptr to corresponding pg frame in pseudo-physical mem buffer
+    return get_frame(tbl, pagenum);
 }
