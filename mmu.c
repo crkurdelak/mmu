@@ -257,6 +257,7 @@ void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     memset(current_frame, 0, PAGE_SIZE, PAGE_SIZE);
     // mark frame as unoccupied
     frametable->entries[current_frame->pagenum].occupied = 0;
+    frametable->entries[current_frame->pagenum].pagenum = NULL;
 }
 
 void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
@@ -265,8 +266,15 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 
     if(pte_none(tbl, pagenum)) {
         // make and set entry for next available frame number
-        // TODO get next available frame number
-        pte_t new_pte = mk_pte(framenum);
+        // find next available frame number
+        int i = 0;
+        framenum_t* open_framenum = NULL;
+        while (i < PAGE_FRAMES && open_framenum == NULL) {
+            if (frametable[i].occupied == 0) {
+                frametable[i] = open_framenum;
+            }
+        }
+        pte_t new_pte = mk_pte(open_framenum);
         set_pte(tbl, pagenum, new_pte);
     }
     else {
@@ -286,9 +294,11 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // read 4k bytes for page
     // put bytes into page frame
     fread(current_frame, 1, PAGE_SIZE, pg_file);
+
     // mark frame as occupied
     frametable->entries[current_frame->pagenum].occupied = 1;
-    // mark as present
+    frametable->entries[current_frame->pagenum].pagenum = pagenum;
+    // mark page as present
     current_pte->present = 1;
     // reset necessary bits
     current_pte->M = 0;
