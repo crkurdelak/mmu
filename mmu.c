@@ -253,6 +253,7 @@ void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     }
 
     // update pte for this page (present = 0)
+    pte_clear(tbl, 102);
     // remove from memory
 }
 
@@ -283,6 +284,8 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // read 4k bytes for page
     // put bytes into page frame
     fread(current_frame, 1, PAGE_SIZE, pg_file);
+    // mark frame as occupied
+    frametable->entries[current_frame->pagenum].occupied = 1;
     // mark as present
     current_pte->present = 1;
     // reset necessary bits
@@ -299,6 +302,8 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         // call load
         mm_page_load(pagefile, tbl, pagenum);
     }
+    // update R bit
+    pte_mkyoung(tbl, pagenum);
     // return ptr to corresponding pg frame in pseudo-physical mem buffer
     return get_frame(tbl, pagenum);
 }
