@@ -217,7 +217,6 @@ addr_t pagetable_translate(const pagetable_t *tbl, const vaddr_t vaddr) {
     // get page table entry of pagenum
     pte_t* pt_entry = &tbl->entries[vaddr.pagenum];
     // ask its framenum and return it
-    // result.framenum = entry.framenum
     result.framenum = pt_entry->framenum;
 
     // offset = other offset
@@ -240,10 +239,10 @@ frame_t* get_frame(pagetable_t* tbl, pagenum_t pagenum) {
 void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // TODO implement mm_page_evict
     pte_t* current_pte = &tbl->entries[pagenum];
-    // if modified, write back to disk
-    if (current_pte->M == 1) {
-        frame_t* current_frame = get_frame(tbl, pagenum);
+    frame_t* current_frame = get_frame(tbl, pagenum);
 
+    // if modified, write back to disk
+    if (pte_dirty(tbl, pagenum)) {
         // open file
         FILE *pg_file = fopen(pagefile, "wb");
         // seek to correct pg num
@@ -254,14 +253,17 @@ void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 
     // update pte for this page (present = 0)
     pte_clear(tbl, 102);
-    // remove from memory
+    // remove from frame
+    memset(current_frame, 0, PAGE_SIZE, PAGE_SIZE);
+    // mark frame as unoccupied
+    frametable->entries[current_frame->pagenum].occupied = 0;
 }
 
 void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // look at pte for this pgnum and figure out which pg frame
     pte_t* current_pte = &(tbl->entries[pagenum]);
 
-    if(current_pte->set == 0) {
+    if(pte_none(tbl, pagenum)) {
         // make and set entry for next available frame number
         // TODO get next available frame number
         pte_t new_pte = mk_pte(framenum);
@@ -295,7 +297,7 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     pte_t* current_pte = &(tbl->entries[pagenum]);
-    if (current_pte->present == 0) {
+    if (!pte_present(tbl, pagenum)) {
         // simulate pg fault by evicting current pg (if any) and loading requested pg
         // call evict
         mm_page_evict(pagefile, tbl, pagenum);
