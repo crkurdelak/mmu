@@ -15,7 +15,8 @@ int main() {
     // Initialize 64KB pseudo-physical memory buffer
     mm_mem_init();
 
-    // TODO call mm_vmem_init
+    char* pagefile = "pagefile.sys";
+    mm_vmem_init(pagefile);
 
     // Allocate page table
     pagetable_t* pagetable = pagetable_alloc();
@@ -65,6 +66,8 @@ int main() {
         p_start_addr = pagetable_translate(pagetable, v_start_addr);
         current_entry = pagetable->entries[p_start_addr.framenum];
         // TODO get pg number
+        // TODO call pte_page w/ page, load pg
+        // TODO go to pg offset to get correct bytes
         // TODO write to page
         pte_mkdirty(pagetable, current_entry.framenum);
         v_start_addr.value += 0b1;

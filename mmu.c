@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "mmu.h"
 
 /**
@@ -237,27 +238,28 @@ frame_t* get_frame(pagetable_t* tbl, pagenum_t pagenum) {
 }
 
 void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
-    // TODO implement mm_page_evict
     pte_t* current_pte = &tbl->entries[pagenum];
-    frame_t* current_frame = get_frame(tbl, pagenum);
+    // check if page is present
+    if(pte_present(tbl, pagenum)) {
+        frame_t *current_frame = get_frame(tbl, pagenum);
 
-    // if modified, write back to disk
-    if (pte_dirty(tbl, pagenum)) {
-        // open file
-        FILE *pg_file = fopen(pagefile, "wb");
-        // seek to correct pg num
-        fseek(pg_file, PAGE_SIZE * pagenum, SEEK_SET);
-        // write page from frame starting at that spot
-        fwrite(current_frame, 1, PAGE_SIZE, pg_file);
+        // if modified, write back to disk
+        if (pte_dirty(tbl, pagenum)) {
+            // open file
+            FILE *pg_file = fopen(pagefile, "wb");
+            // seek to correct pg num
+            fseek(pg_file, PAGE_SIZE * pagenum, SEEK_SET);
+            // write page from frame starting at that spot
+            fwrite(current_frame, 1, PAGE_SIZE, pg_file);
+        }
+
+        // update pte for this page (present = 0)
+        pte_clear(tbl, 102);
+        // remove from frame
+        memset(current_frame, 0, PAGE_SIZE);
+        // mark frame as unoccupied
+        frametable->entries[current_pte->framenum].occupied = 0;
     }
-
-    // update pte for this page (present = 0)
-    pte_clear(tbl, 102);
-    // remove from frame
-    memset(current_frame, 0, PAGE_SIZE, PAGE_SIZE);
-    // mark frame as unoccupied
-    frametable->entries[current_frame->pagenum].occupied = 0;
-    frametable->entries[current_frame->pagenum].pagenum = NULL;
 }
 
 void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
@@ -267,14 +269,15 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     if(pte_none(tbl, pagenum)) {
         // make and set entry for next available frame number
         // find next available frame number
-        int i = 0;
+        framenum_t i = 0;
         framenum_t* open_framenum = NULL;
         while (i < PAGE_FRAMES && open_framenum == NULL) {
-            if (frametable[i].occupied == 0) {
-                frametable[i] = open_framenum;
+            if (frametable->entries[i].occupied == 0) {
+                *open_framenum = i;
             }
+            i++;
         }
-        pte_t new_pte = mk_pte(open_framenum);
+        pte_t new_pte = mk_pte(*open_framenum);
         set_pte(tbl, pagenum, new_pte);
     }
     else {
@@ -296,8 +299,8 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     fread(current_frame, 1, PAGE_SIZE, pg_file);
 
     // mark frame as occupied
-    frametable->entries[current_frame->pagenum].occupied = 1;
-    frametable->entries[current_frame->pagenum].pagenum = pagenum;
+    frametable->entries[current_pte->framenum].occupied = 1;
+    frametable->entries[current_pte->framenum].pagenum = pagenum;
     // mark page as present
     current_pte->present = 1;
     // reset necessary bits
