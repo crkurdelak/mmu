@@ -6,9 +6,8 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "mmu.h"
-
-#define PAGEFILE "pagefile.sys"
 
 int main() {
     // TODO implement simulation
@@ -43,20 +42,26 @@ int main() {
     vaddr_t v_start_addr = {0b00000101000000000000};
     addr_t p_start_addr = pagetable_translate(pagetable, v_start_addr);
     pte_t current_entry = pagetable->entries[p_start_addr.framenum];
-    // TODO get pg number
-    // TODO call pte_page w/ page, load pg
-    // TODO go to pg offset to get correct bytes
-    // TODO put bytes into variable
+    // get frame number
+    pagenum_t current_pgnum = current_entry.framenum;
+    // load page
+    frame_t* current_frame = pte_page(pagefile, pagetable, current_pgnum);
+    // go to pg offset to get correct bytes, and put them into a variable
+    int var_1 = current_frame->bytes[p_start_addr.offset];
 
     // Read 4096 bytes sequentially starting at virtual address 0110 0100 0100 0000 0000
     v_start_addr.value = 0b01100100010000000000;
+
     for (int i = 0; i < 4096; i++) {
         p_start_addr = pagetable_translate(pagetable, v_start_addr);
         current_entry = pagetable->entries[p_start_addr.framenum];
-        // TODO get pg number
-        // TODO call pte_page w/ page, load pg
-        // TODO go to pg offset to get correct bytes
-        // TODO put bytes into variable
+        // get frame number
+        current_pgnum = current_entry.framenum;
+        // load page
+        current_frame = pte_page(pagefile, pagetable, current_pgnum);
+        // go to pg offset to get correct bytes, and put them into a variable
+        // TODO change this to accumulate the bits
+        int var_2 = current_frame->bytes[p_start_addr.offset];
         v_start_addr.value += 0b1;
     }
 
@@ -73,15 +78,8 @@ int main() {
         v_start_addr.value += 0b1;
     }
 
-
     // Evict virtual page 102
     mm_page_evict(pagefile, pagetable, 102);
-    // if dirty, write to disk
-    if(pte_dirty(pagetable, 102)) {
-        // TODO write to disk
-    }
-    // take it out of its frame
-    pte_clear(pagetable, 102);
 
     // Free page table
     pagetable_free(pagetable);
