@@ -273,7 +273,7 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         framenum_t* open_framenum = NULL;
         while (i < PAGE_FRAMES && open_framenum == NULL) {
             if (frametable->entries[i].occupied == 0) {
-                *open_framenum = i;
+                open_framenum = &i;
             }
             i++;
         }
