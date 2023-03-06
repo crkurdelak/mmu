@@ -51,7 +51,6 @@ int main() {
 
     // Read 4096 bytes sequentially starting at virtual address 0110 0100 0100 0000 0000
     v_start_addr.value = 0b01100100010000000000;
-
     for (int i = 0; i < 4096; i++) {
         p_start_addr = pagetable_translate(pagetable, v_start_addr);
         current_entry = pagetable->entries[p_start_addr.framenum];
@@ -67,15 +66,19 @@ int main() {
 
     // Write 4 bytes sequentially starting at virtual address 0010 1010 0000 0010 1010
     v_start_addr.value = 0b00101010000000101010;
+    int new_bytes[4] = {0b1111, 0b1111, 0b1111, 0b1111};
     for (int i = 0; i < 4; i++) {
         p_start_addr = pagetable_translate(pagetable, v_start_addr);
         current_entry = pagetable->entries[p_start_addr.framenum];
-        // TODO get pg number
-        // TODO call pte_page w/ page, load pg
-        // TODO go to pg offset to get correct bytes
-        // TODO write to page
+        // get pg number
+        current_pgnum = current_entry.framenum;
+        // load pg
+        current_frame = pte_page(pagefile, pagetable, current_pgnum);
+        // write to page at offset
+        current_frame->bytes[p_start_addr.offset] = new_bytes[i];
         pte_mkdirty(pagetable, current_entry.framenum);
         v_start_addr.value += 0b1;
+        pte_mkdirty(pagetable, current_pgnum);
     }
 
     // Evict virtual page 102
