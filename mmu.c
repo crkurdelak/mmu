@@ -89,6 +89,7 @@ bool mm_vmem_init(char* pagefile) {
     // open new pagefile in binary mode
     FILE *pg_file = fopen(pagefile, "wb");
     if (pg_file != NULL) {
+        success = true;
         // make contents of pages all zeros
         for (int i = 0; i < filesize; i++) {
             // write to the file

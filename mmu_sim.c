@@ -7,10 +7,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <io.h>
 #include "mmu.h"
 
 int main() {
-    // TODO implement simulation
     // Initialize 64KB pseudo-physical memory buffer
     mm_mem_init();
 
@@ -47,10 +47,13 @@ int main() {
     // load page
     frame_t* current_frame = pte_page(pagefile, pagetable, current_pgnum);
     // go to pg offset to get correct bytes, and put them into a variable
-    int var_1 = current_frame->bytes[p_start_addr.offset];
+    int byte_read = current_frame->bytes[p_start_addr.offset];
 
     // Read 4096 bytes sequentially starting at virtual address 0110 0100 0100 0000 0000
     v_start_addr.value = 0b01100100010000000000;
+    int bytes_read[4096] = {};
+    // initialize it to be all 1s so we can see if the bytes were read from the pagefile
+    memset(bytes_read, 1, 4096);
     for (int i = 0; i < 4096; i++) {
         p_start_addr = pagetable_translate(pagetable, v_start_addr);
         current_entry = pagetable->entries[p_start_addr.framenum];
@@ -59,8 +62,7 @@ int main() {
         // load page
         current_frame = pte_page(pagefile, pagetable, current_pgnum);
         // go to pg offset to get correct bytes, and put them into a variable
-        // TODO change this to accumulate the bits
-        int var_2 = current_frame->bytes[p_start_addr.offset];
+        bytes_read[i] = current_frame->bytes[p_start_addr.offset];
         v_start_addr.value += 0b1;
     }
 
