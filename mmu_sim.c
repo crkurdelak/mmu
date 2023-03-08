@@ -58,33 +58,52 @@ int main() {
         }
         // else if READ
         else if (strcmp(args[0], "READ") == 0) {
+            addr_t vaddr = args[1];
             // call fn
-            mmu_sim_read();
+            printf("%d", mmu_sim_read(vaddr));
         }
         // else if READN
         else if (strcmp(args[0], "READN") == 0) {
+            addr_t vaddr = args[1];
+            int nbytes = args[2];
             // call fn
-            mmu_sim_readn();
+            uint8_t* bytes_read = mmu_sim_readn(vaddr, nbytes);
+            // print bytes read
         }
         // else if WRITE
         else if (strcmp(args[0], "WRITE") == 0) {
+            addr_t vaddr = args[1];
+            uint8_t val = args[2];
             // call fn
-            mmu_sim_write();
+            mmu_sim_write(vaddr, val);
         }
         // else if WRITEW
         else if (strcmp(args[0], "WRITEW") == 0) {
+            addr_t vaddr = args[1];
+            uint8_t val1 = args[2];
+            uint8_t val2 = args[3];
+
             // call fn
-            mmu_sim_writew();
+            mmu_sim_writew(vaddr, val1, val2);
         }
         // else if WRITEDW
         else if (strcmp(args[0], "WRITEDW") == 0) {
+            addr_t vaddr = args[1];
+            uint8_t val1 = args[2];
+            uint8_t val2 = args[3];
+            uint8_t val3 = args[4];
+            uint8_t val4 = args[5];
+
             // call fn
-            mmu_sim_writedw();
+            mmu_sim_writedw(vaddr, val1, val2, val3, val4);
         }
         // else if WRITEZ
         else if (strcmp(args[0], "WRITEZ") == 0) {
+            addr_t vaddr = args[1];
+            int nbytes = args[2];
+
             // call fn
-            mmu_sim_writez();
+            mmu_sim_writez(vaddr, nbytes);
         }
         // else error
         else {
@@ -96,27 +115,17 @@ int main() {
 }
 
 
-int get_args(char* cmd, char* args_array[]) {
-    int is_bg = 0;     // 1 if the command is a background job, else 0
-    // check if last char is &
+void get_args(char* cmd, char* args_array[]) {
     int cmd_len = strlen(cmd);
-    char *last_char = &cmd[cmd_len - 2];
-    if (strcmp(last_char, "&\n") == 0) {
-        is_bg = 1;
-    }
     char *current_token = strtok(cmd, " \n");
     int i = 0;
     while (current_token) {
-        // if token is &, do not put in array
-        if (strcmp(current_token, "&") != 0) {
-            // put current token in array
-            args_array[i] = current_token;
-        }
+        // put current token in array
+        args_array[i] = current_token;
         i++;
         // get new token
         current_token = strtok(NULL, " \n");
     }
-    return is_bg;
 }
 
 

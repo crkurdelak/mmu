@@ -13,4 +13,4 @@
  * @param args_array the array in which to store the args
  * @return 1 if the job is a background job, else return 0
  */
-int get_args(char* cmd, char* args_array[]);
+void get_args(char* cmd, char* args_array[]);
