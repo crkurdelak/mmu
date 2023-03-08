@@ -10,6 +10,7 @@
 #include <io.h>
 #include "mmu.h"
 #include "mmu_sim.h"
+#include "mmu_sim_cmd.h"
 
 int main() {
     // Initialize 64KB pseudo-physical memory buffer
@@ -47,18 +48,6 @@ int main() {
         get_args(cmd, args);
 
         // branching logic to handle specific, well-defined commands
-        /*
-         *
-    READ <VADDR> — read one byte at the specified virtual address
-    READN <VADDR> <NBYTES> — read the specified number of bytes starting at the specified virtual address
-    WRITE <VADDR> <VALUE> — write the specified byte value at the specified virtual address
-    WRITEW <VADDR> <VALUE> <VALUE> — write the specified word (2 byte) value starting at the specified virtual address
-    WRITEDW <VADDR> <VALUE> <VALUE> <VALUE> <VALUE> — write the specified double word (4 byte) value starting at the specified virtual address
-    WRITEZ <VADDR> <NBYTES> — write a zero value for the specified number of bytes starting at the specified virtual address
-    HALT — halt execution; exit the instruction processing loop, evict all present pages to the backing page file, then exit the program
-
-         */
-
         // if the command is empty
         if (strcmp(cmd, "\n") == 0) {
             // this does not print a newline
@@ -70,30 +59,36 @@ int main() {
         // else if READ
         else if (strcmp(args[0], "READ") == 0) {
             // call fn
+            mmu_sim_read();
         }
         // else if READN
         else if (strcmp(args[0], "READN") == 0) {
-            //
+            // call fn
+            mmu_sim_readn();
         }
         // else if WRITE
         else if (strcmp(args[0], "WRITE") == 0) {
-            //
+            // call fn
+            mmu_sim_write();
         }
         // else if WRITEW
         else if (strcmp(args[0], "WRITEW") == 0) {
-            //
+            // call fn
+            mmu_sim_writew();
         }
         // else if WRITEDW
         else if (strcmp(args[0], "WRITEDW") == 0) {
-            //
+            // call fn
+            mmu_sim_writedw();
         }
         // else if WRITEZ
         else if (strcmp(args[0], "WRITEZ") == 0) {
-            //
+            // call fn
+            mmu_sim_writez();
         }
         // else error
         else {
-            //
+            // error msg
         }
     }
 
