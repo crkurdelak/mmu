@@ -1,6 +1,9 @@
-//
-// Created by crkur on 3/8/2023.
-//
+/**
+ * @file mmu_sim_cmd.h
+ * @brief Function declarations for the commands for mmu_sim.
+ *
+ * @author ckurdelak20@georgefox.edu
+ */
 
 #ifndef MMU_NEW_MMU_SIM_CMD_H
 #define MMU_NEW_MMU_SIM_CMD_H
