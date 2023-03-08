@@ -9,8 +9,123 @@
 #include <stdio.h>
 #include <io.h>
 #include "mmu.h"
+#include "mmu_sim.h"
 
 int main() {
+    // Initialize 64KB pseudo-physical memory buffer
+    mm_mem_init();
+
+    char* pagefile = "pagefile.sys";
+    mm_vmem_init(pagefile);
+
+    // Allocate page table
+    pagetable_t* pagetable = pagetable_alloc();
+
+    int last_exit_status = 0;
+
+    // input buffer
+    char cmd[255];
+    // buffer for current working directory
+    char current_dir[255];
+    bool quit = false;
+
+    // while not exit:
+    while (!quit) {
+        // clear out input buffer
+        memset(cmd, '\0', 255);
+
+        // output prompt to stdout
+        printf("mmu sim$ ");
+        fflush(stdout);
+
+        // read user command from stdin
+        read(STDIN_FILENO, cmd, 255);
+
+        // the args from the user's command
+        char* args[255];
+        memset(args, '\0', 255);
+        get_args(cmd, args);
+
+        // branching logic to handle specific, well-defined commands
+        /*
+         *
+    READ <VADDR> — read one byte at the specified virtual address
+    READN <VADDR> <NBYTES> — read the specified number of bytes starting at the specified virtual address
+    WRITE <VADDR> <VALUE> — write the specified byte value at the specified virtual address
+    WRITEW <VADDR> <VALUE> <VALUE> — write the specified word (2 byte) value starting at the specified virtual address
+    WRITEDW <VADDR> <VALUE> <VALUE> <VALUE> <VALUE> — write the specified double word (4 byte) value starting at the specified virtual address
+    WRITEZ <VADDR> <NBYTES> — write a zero value for the specified number of bytes starting at the specified virtual address
+    HALT — halt execution; exit the instruction processing loop, evict all present pages to the backing page file, then exit the program
+
+         */
+
+        // if the command is empty
+        if (strcmp(cmd, "\n") == 0) {
+            // this does not print a newline
+        }
+            // if command is "HALT", exit = true
+        else if (strcmp(args[0], "HALT") == 0) {
+            quit = true;
+        }
+        // else if READ
+        else if (strcmp(args[0], "READ") == 0) {
+            // call fn
+        }
+        // else if READN
+        else if (strcmp(args[0], "READN") == 0) {
+            //
+        }
+        // else if WRITE
+        else if (strcmp(args[0], "WRITE") == 0) {
+            //
+        }
+        // else if WRITEW
+        else if (strcmp(args[0], "WRITEW") == 0) {
+            //
+        }
+        // else if WRITEDW
+        else if (strcmp(args[0], "WRITEDW") == 0) {
+            //
+        }
+        // else if WRITEZ
+        else if (strcmp(args[0], "WRITEZ") == 0) {
+            //
+        }
+        // else error
+        else {
+            //
+        }
+    }
+
+    exit(0);
+}
+
+
+int get_args(char* cmd, char* args_array[]) {
+    int is_bg = 0;     // 1 if the command is a background job, else 0
+    // check if last char is &
+    int cmd_len = strlen(cmd);
+    char *last_char = &cmd[cmd_len - 2];
+    if (strcmp(last_char, "&\n") == 0) {
+        is_bg = 1;
+    }
+    char *current_token = strtok(cmd, " \n");
+    int i = 0;
+    while (current_token) {
+        // if token is &, do not put in array
+        if (strcmp(current_token, "&") != 0) {
+            // put current token in array
+            args_array[i] = current_token;
+        }
+        i++;
+        // get new token
+        current_token = strtok(NULL, " \n");
+    }
+    return is_bg;
+}
+
+
+    /*
     // Initialize 64KB pseudo-physical memory buffer
     mm_mem_init();
 
@@ -92,4 +207,4 @@ int main() {
     mm_mem_destroy();
 
     exit(EXIT_SUCCESS);
-}
+     */

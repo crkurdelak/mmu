@@ -311,8 +311,26 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     pte_t* current_pte = &(tbl->entries[pagenum]);
+    // TODO check if page is mapped
+
+    // if not mapped:
+    //      if there is an available frame:
+    //          map pg to it and load pg to it
+    //      else:
+    //          choose best pg to evict
+    //          update mapping for requested pg
+    //          load requested pg to frame
+    // else:
+    //      if not present and no other pg mapped there is present:
+    //          load requested pg to frame
+    //      else:
+    //          choose best pg to evict
+    //          update mapping for requested pg
+    //          load requested pg to frame
+
     if (!pte_present(tbl, pagenum)) {
         // simulate pg fault by evicting current pg (if any) and loading requested pg
+        // TODO choose page to evict based on aging counter (page with lowest counter)
         // call evict
         mm_page_evict(pagefile, tbl, pagenum);
         // call load
