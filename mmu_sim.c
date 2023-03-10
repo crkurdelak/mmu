@@ -58,13 +58,13 @@ int main() {
         }
         // else if READ
         else if (strcmp(args[0], "READ") == 0) {
-            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             // call fn
             printf("%d", mmu_sim_read(vaddr));
         }
         // else if READN
         else if (strcmp(args[0], "READN") == 0) {
-            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             int nbytes = strtol(args[2], NULL, 10);
             // call fn
             uint8_t* bytes_read = mmu_sim_readn(vaddr, nbytes);
@@ -72,14 +72,14 @@ int main() {
         }
         // else if WRITE
         else if (strcmp(args[0], "WRITE") == 0) {
-            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             uint8_t val = strtoul(args[2], NULL, 2);
             // call fn
-            mmu_sim_write(vaddr, val);
+            mmu_sim_write(pagefile, pagetable, vaddr, val);
         }
         // else if WRITEW
         else if (strcmp(args[0], "WRITEW") == 0) {
-            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             uint8_t val1 = strtoul(args[2], NULL, 2);
             uint8_t val2 = strtoul(args[3], NULL, 2);
 
@@ -88,7 +88,7 @@ int main() {
         }
         // else if WRITEDW
         else if (strcmp(args[0], "WRITEDW") == 0) {
-            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             uint8_t val1 = strtoul(args[2], NULL, 2);
             uint8_t val2 = strtoul(args[3], NULL, 2);
             uint8_t val3 = strtoul(args[4], NULL, 2);
@@ -99,7 +99,7 @@ int main() {
         }
         // else if WRITEZ
         else if (strcmp(args[0], "WRITEZ") == 0) {
-            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             int nbytes = strtol(args[2], NULL, 10);
 
             // call fn
