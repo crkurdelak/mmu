@@ -58,49 +58,49 @@ int main() {
         }
         // else if READ
         else if (strcmp(args[0], "READ") == 0) {
-            addr_t vaddr = args[1];
+            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             // call fn
             printf("%d", mmu_sim_read(vaddr));
         }
         // else if READN
         else if (strcmp(args[0], "READN") == 0) {
-            addr_t vaddr = args[1];
-            int nbytes = args[2];
+            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            int nbytes = strtol(args[2], NULL, 10);
             // call fn
             uint8_t* bytes_read = mmu_sim_readn(vaddr, nbytes);
             // print bytes read
         }
         // else if WRITE
         else if (strcmp(args[0], "WRITE") == 0) {
-            addr_t vaddr = args[1];
-            uint8_t val = args[2];
+            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            uint8_t val = strtoul(args[2], NULL, 2);
             // call fn
             mmu_sim_write(vaddr, val);
         }
         // else if WRITEW
         else if (strcmp(args[0], "WRITEW") == 0) {
-            addr_t vaddr = args[1];
-            uint8_t val1 = args[2];
-            uint8_t val2 = args[3];
+            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            uint8_t val1 = strtoul(args[2], NULL, 2);
+            uint8_t val2 = strtoul(args[3], NULL, 2);
 
             // call fn
             mmu_sim_writew(vaddr, val1, val2);
         }
         // else if WRITEDW
         else if (strcmp(args[0], "WRITEDW") == 0) {
-            addr_t vaddr = args[1];
-            uint8_t val1 = args[2];
-            uint8_t val2 = args[3];
-            uint8_t val3 = args[4];
-            uint8_t val4 = args[5];
+            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            uint8_t val1 = strtoul(args[2], NULL, 2);
+            uint8_t val2 = strtoul(args[3], NULL, 2);
+            uint8_t val3 = strtoul(args[4], NULL, 2);
+            uint8_t val4 = strtoul(args[5], NULL, 2);
 
             // call fn
             mmu_sim_writedw(vaddr, val1, val2, val3, val4);
         }
         // else if WRITEZ
         else if (strcmp(args[0], "WRITEZ") == 0) {
-            addr_t vaddr = args[1];
-            int nbytes = args[2];
+            addr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
+            int nbytes = strtol(args[2], NULL, 10);
 
             // call fn
             mmu_sim_writez(vaddr, nbytes);
