@@ -29,7 +29,7 @@ uint8_t mmu_sim_read(char *pagefile, pagetable_t *tbl, vaddr_t vaddr);
  * @param nbytes the number of bytes to be read
  * @return the bytes stored starting at the specified starting address
  */
-uint8_t *mmu_sim_readn(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, int nbytes);
+void mmu_sim_readn(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, int nbytes);
 
 /**
  * Writes the specified byte value at the specified virtual address.

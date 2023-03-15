@@ -21,12 +21,12 @@ uint8_t mmu_sim_read(char *pagefile, pagetable_t *tbl, vaddr_t vaddr) {
     return byte_read;
 }
 
-uint8_t *mmu_sim_readn(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, int nbytes) {
+void mmu_sim_readn(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, int nbytes) {
     uint8_t bytes_read[] = {};
     for (int i = 0b0; i < nbytes; i++) {
-        bytes_read[i] = mmu_sim_read(pagefile, tbl, vaddr + i);
+        vaddr.value ++;
+        bytes_read[i] = mmu_sim_read(pagefile, tbl, vaddr);
     }
-    return &bytes_read;
 }
 
 void mmu_sim_write(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, uint8_t val) {
@@ -39,21 +39,26 @@ void mmu_sim_write(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, uint8_t val)
 void mmu_sim_writew(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, uint8_t val1, uint8_t val2) {
     // write 2 bytes
     mmu_sim_write(pagefile, tbl, vaddr, val1);
-    mmu_sim_write(pagefile, tbl, vaddr + 1, val2);
+    vaddr.value ++;
+    mmu_sim_write(pagefile, tbl, vaddr, val2);
 }
 
 void mmu_sim_writedw(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, uint8_t val1, uint8_t val2,
                      uint8_t val3, uint8_t val4) {
     // write 4 bytes
     mmu_sim_write(pagefile, tbl, vaddr, val1);
-    mmu_sim_write(pagefile, tbl, vaddr + 1, val2);
-    mmu_sim_write(pagefile, tbl, vaddr + 2, val3);
-    mmu_sim_write(pagefile, tbl, vaddr + 3, val4);
+    vaddr.value ++;
+    mmu_sim_write(pagefile, tbl, vaddr, val2);
+    vaddr.value ++;
+    mmu_sim_write(pagefile, tbl, vaddr, val3);
+    vaddr.value ++;
+    mmu_sim_write(pagefile, tbl, vaddr, val4);
 }
 
 void mmu_sim_writez(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, int nbytes) {
     // write nbytes zeros
     for (int i = 0; i < nbytes; i++) {
-        mmu_sim_write(pagefile, tbl, vaddr + i, 0);
+        vaddr.value ++;
+        mmu_sim_write(pagefile, tbl, vaddr, 0);
     }
 }
