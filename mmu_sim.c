@@ -32,6 +32,8 @@ int main() {
 
     // while not exit:
     while (!quit) {
+        // TODO shift aging counters for all pgs
+
         // clear out input buffer
         memset(cmd, '\0', 255);
 
@@ -60,14 +62,14 @@ int main() {
         else if (strcmp(args[0], "READ") == 0) {
             vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             // call fn
-            printf("%d", mmu_sim_read(vaddr));
+            printf("%d", mmu_sim_read(pagefile, pagetable, vaddr));
         }
         // else if READN
         else if (strcmp(args[0], "READN") == 0) {
             vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             int nbytes = strtol(args[2], NULL, 10);
             // call fn
-            uint8_t* bytes_read = mmu_sim_readn(vaddr, nbytes);
+            uint8_t* bytes_read = mmu_sim_readn(pagefile, pagetable, vaddr, nbytes);
             // print bytes read
         }
         // else if WRITE
@@ -84,7 +86,7 @@ int main() {
             uint8_t val2 = strtoul(args[3], NULL, 2);
 
             // call fn
-            mmu_sim_writew(vaddr, val1, val2);
+            mmu_sim_writew(pagefile, pagetable, vaddr, val1, val2);
         }
         // else if WRITEDW
         else if (strcmp(args[0], "WRITEDW") == 0) {
@@ -95,7 +97,7 @@ int main() {
             uint8_t val4 = strtoul(args[5], NULL, 2);
 
             // call fn
-            mmu_sim_writedw(vaddr, val1, val2, val3, val4);
+            mmu_sim_writedw(pagefile, pagetable, vaddr, val1, val2, val3, val4);
         }
         // else if WRITEZ
         else if (strcmp(args[0], "WRITEZ") == 0) {
@@ -103,7 +105,7 @@ int main() {
             int nbytes = strtol(args[2], NULL, 10);
 
             // call fn
-            mmu_sim_writez(vaddr, nbytes);
+            mmu_sim_writez(pagefile, pagetable, vaddr, nbytes);
         }
         // else error
         else {

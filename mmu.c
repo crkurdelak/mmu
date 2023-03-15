@@ -338,6 +338,7 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     }
     // update R bit
     pte_mkyoung(tbl, pagenum);
+    // TODO put 1 in aging counter
     // return ptr to corresponding pg frame in pseudo-physical mem buffer
     return get_frame(tbl, pagenum);
 }
