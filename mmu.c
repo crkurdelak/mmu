@@ -286,6 +286,13 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     current_pte->R = 0;
 }
 
+void aging_alg(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
+    // choose best pg to evict and evict it
+    // look for page with smallest aging counter
+    // update mapping for requested pg
+    // load requested pg to frame
+}
+
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     pte_t* current_pte = &(tbl->entries[pagenum]);
 
@@ -313,9 +320,7 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
             }
         }
         else {
-            // choose best pg to evict and evict it
-            // update mapping for requested pg
-            // load requested pg to frame
+            aging_alg(pagefile, tbl, pagenum);
         }
     }
     else {
@@ -326,9 +331,7 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
             mm_page_load(pagefile, tbl, pagenum);
         }
         else {
-            // choose best pg to evict and evict it
-            // update mapping for requested pg
-            // load requested pg to frame
+            aging_alg(pagefile, tbl, pagenum);
         }
     }
 
