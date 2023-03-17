@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <io.h>
+#include <invkprxy.h>
 #include "mmu.h"
 #include "mmu_sim.h"
 #include "mmu_sim_cmd.h"
@@ -61,16 +62,14 @@ int main() {
         // else if READ
         else if (strcmp(args[0], "READ") == 0) {
             vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
-            // call fn
-            printf("%d", mmu_sim_read(pagefile, pagetable, vaddr));
+            mmu_sim_read(pagefile, pagetable, vaddr);
         }
         // else if READN
         else if (strcmp(args[0], "READN") == 0) {
             vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             int nbytes = strtol(args[2], NULL, 10);
             // call fn
-            uint8_t* bytes_read = mmu_sim_readn(pagefile, pagetable, vaddr, nbytes);
-            // print bytes read
+            mmu_sim_readn(pagefile, pagetable, vaddr, nbytes);
         }
         // else if WRITE
         else if (strcmp(args[0], "WRITE") == 0) {
@@ -84,7 +83,6 @@ int main() {
             vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             uint8_t val1 = strtoul(args[2], NULL, 2);
             uint8_t val2 = strtoul(args[3], NULL, 2);
-
             // call fn
             mmu_sim_writew(pagefile, pagetable, vaddr, val1, val2);
         }
@@ -95,7 +93,6 @@ int main() {
             uint8_t val2 = strtoul(args[3], NULL, 2);
             uint8_t val3 = strtoul(args[4], NULL, 2);
             uint8_t val4 = strtoul(args[5], NULL, 2);
-
             // call fn
             mmu_sim_writedw(pagefile, pagetable, vaddr, val1, val2, val3, val4);
         }
@@ -103,13 +100,8 @@ int main() {
         else if (strcmp(args[0], "WRITEZ") == 0) {
             vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
             int nbytes = strtol(args[2], NULL, 10);
-
             // call fn
             mmu_sim_writez(pagefile, pagetable, vaddr, nbytes);
-        }
-        // else error
-        else {
-            // error msg
         }
     }
 
@@ -118,7 +110,6 @@ int main() {
 
 
 void get_args(char* cmd, char* args_array[]) {
-    int cmd_len = strlen(cmd);
     char *current_token = strtok(cmd, " \n");
     int i = 0;
     while (current_token) {
@@ -126,7 +117,7 @@ void get_args(char* cmd, char* args_array[]) {
         args_array[i] = current_token;
         i++;
         // get new token
-        current_token = strtok(NULL, " \n");
+        current_token = strtok(NULL, " \n\t");
     }
 }
 

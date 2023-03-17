@@ -266,29 +266,6 @@ void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // look at pte for this pgnum and figure out which pg frame
     pte_t* current_pte = &(tbl->entries[pagenum]);
-
-    if(pte_none(tbl, pagenum)) {
-        // make and set entry for next available frame number
-        // find next available frame number
-        framenum_t i = 0;
-        framenum_t* open_framenum = NULL;
-        while (i < PAGE_FRAMES && open_framenum == NULL) {
-            if (frametable->entries[i].occupied == 0) {
-                open_framenum = &i;
-            }
-            i++;
-        }
-        pte_t new_pte = mk_pte(*open_framenum);
-        set_pte(tbl, pagenum, new_pte);
-    }
-    else {
-        fte_t* requested_fte = &(frametable->entries[pagenum]);
-        if (requested_fte->occupied == 1) {
-            // evict existing frame
-            mm_page_evict(pagefile, tbl, pagenum);
-        }
-    }
-
     frame_t* current_frame = get_frame(tbl, pagenum);
 
     // open file
@@ -312,32 +289,49 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     pte_t* current_pte = &(tbl->entries[pagenum]);
 
+    // if page not present in memory
     if (!pte_present(tbl, pagenum)) {
         // if not mapped (not set):
-        //      if there is an available frame:
-        //          map pg to it and load pg to it
-        //      else:
-        //          choose best pg to evict
-        //          update mapping for requested pg
-        //          load requested pg to frame
-        // else:
-        //      if not present and no other pg mapped there is present:
-        //          load requested pg to frame
-        //      else:
-        //          choose best pg to evict
-        //          update mapping for requested pg
-        //          load requested pg to frame
-
-
-        // simulate pg fault by evicting current pg (if any) and loading requested pg
-        // TODO choose page to evict based on aging counter (page with lowest counter)
-        // find out which page is in the frame
-        // find framenum
-        // find occupant of that frame
-        mm_page_evict(pagefile, tbl, pagenum);
-        // call load
-        mm_page_load(pagefile, tbl, pagenum);
+        if(pte_none(tbl, pagenum)) {
+            // search for a free frame
+            framenum_t i = 0;
+            framenum_t* open_framenum = NULL;
+            bool frame_found = false;
+            while (i < PAGE_FRAMES && open_framenum == NULL) {
+                if (frametable->entries[i].occupied == 0) {
+                    open_framenum = &i;
+                    frame_found = true;
+                }
+                i++;
+            }
+            //if there is an available frame:
+            if (frame_found) {
+                //map pg to it and load pg to it
+                pte_t new_pte = mk_pte(*open_framenum);
+                set_pte(tbl, pagenum, new_pte);
+                mm_page_load(pagefile, tbl, pagenum);
+            }
+        }
+        else {
+            // choose best pg to evict and evict it
+            // update mapping for requested pg
+            // load requested pg to frame
+        }
     }
+    else {
+        fte_t* current_fte = frametable[current_pte->framenum].entries;
+        // if no other pg mapped there is present:
+        if (current_fte->occupied != 1) {
+            // load requested pg to frame
+            mm_page_load(pagefile, tbl, pagenum);
+        }
+        else {
+            // choose best pg to evict and evict it
+            // update mapping for requested pg
+            // load requested pg to frame
+        }
+    }
+
     // update R bit
     pte_mkyoung(tbl, pagenum);
     // TODO put 1 in aging counter
