@@ -7,8 +7,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <io.h>
-//#include <invkprxy.h>
+#include <string.h>
+#include <unistd.h>
 #include "mmu.h"
 #include "mmu_sim.h"
 #include "mmu_sim_cmd.h"
@@ -46,7 +46,7 @@ int main() {
         fflush(stdout);
 
         // read user command from stdin
-        read(STDIN_FILENO, cmd, 255);
+        fgets(cmd, 255, stdin);
 
         // the args from the user's command
         char* args[255];
@@ -108,6 +108,10 @@ int main() {
         }
     }
 
+    // for each frame, evict
+    for (int i = 0; i < PAGETABLE_SIZE; i++) {
+        mm_page_evict(pagefile, pagetable, (pagenum_t)i);
+    }
     exit(0);
 }
 
