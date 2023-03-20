@@ -112,6 +112,10 @@ int main() {
     for (int i = 0; i < PAGETABLE_SIZE; i++) {
         mm_page_evict(pagefile, pagetable, (pagenum_t)i);
     }
+    // Free page table
+    pagetable_free(pagetable);
+    // Destroy pseudo-physical memory frames
+    mm_mem_destroy();
     exit(0);
 }
 

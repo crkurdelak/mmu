@@ -69,9 +69,26 @@ frame_t* mm_mem_init() {
 }
 
 
+/**
+ * @brief Frees the specified frame table from memory.
+ * @param tbl the frame table to be freed from memory
+ */
+void frametable_free(frametable_t* tbl){
+    if (tbl != NULL) {
+        free(tbl->entries);
+        free(tbl);
+    }
+}
+
+
 void mm_mem_destroy() {
     if (mem_frames != NULL) {
         free(mem_frames);
+    }
+
+    // free frame table
+    if (frametable != NULL) {
+        frametable_free(frametable);
     }
 }
 
@@ -116,18 +133,6 @@ pagetable_t* pagetable_alloc() {
 }
 
 void pagetable_free(pagetable_t* tbl) {
-    if (tbl != NULL) {
-        free(tbl->entries);
-        free(tbl);
-    }
-}
-
-
-/**
- * @brief Frees the specified frame table from memory.
- * @param tbl the frame table to be freed from memory
- */
-void frametable_free(frametable_t* tbl){
     if (tbl != NULL) {
         free(tbl->entries);
         free(tbl);
@@ -313,9 +318,13 @@ void aging_alg(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         }
     }
     if (oldest_pgnum == NULL) {
-        // TODO pick one at random
         // pick random int between 0-255
+        srand(pagenum);
+        int upper_bound = 255;
+        int lower_bound = 0;
+        int num = (rand() % (upper_bound - lower_bound + 1)) + lower_bound;
         // make it pagenum
+        *oldest_pgnum = (pagenum_t)num;
     }
 
     mm_page_evict(pagefile, tbl, *oldest_pgnum);
@@ -357,7 +366,9 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         }
     }
     else {
-        fte_t* current_fte = frametable[current_pte->framenum].entries;
+        fte_t* current_fte = frametable[current_pte->framenum].entries; // TODO find out why this
+        // is null
+
         // if no other pg mapped there is present:
         if (current_fte->occupied != 1) {
             // load requested pg to frame
