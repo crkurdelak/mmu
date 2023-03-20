@@ -197,11 +197,17 @@ int pte_young(const pagetable_t *tbl, pagenum_t pagenum) {
 }
 
 void pte_mkyoung(pagetable_t *tbl, pagenum_t pagenum) {
-    tbl->entries[pagenum].R = 1;
+    pte_t* current_pte = &tbl->entries[pagenum];
+    current_pte->R = 1;
+    // put a 1 in aging counter
+    current_pte->age | 0b10000000;
+
 }
 
 void pte_mkold(pagetable_t *tbl, pagenum_t pagenum) {
-    tbl->entries[pagenum].R = 0;
+    pte_t* current_pte = &tbl->entries[pagenum];
+    current_pte->R = 0;
+    current_pte->age >> 1;
 }
 
 pte_t pte_val(pagetable_t *tbl, pagenum_t pagenum) {
@@ -286,11 +292,33 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     current_pte->R = 0;
 }
 
+/**
+ * Evicts the page with the smallest aging counter, and loads the specified page into its frame.
+ * @param pagefile the pagefile
+ * @param tbl the page table
+ * @param pagenum the page number of the page to be brought in
+ */
 void aging_alg(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // choose best pg to evict and evict it
     // look for page with smallest aging counter
+    pte_t* oldest_pte = NULL;
+    pagenum_t* oldest_pgnum = NULL;
+    uint16_t oldest_age = 0b10000000;
+    for (int i = 0; i < PAGETABLE_SIZE; i++) {
+        pte_t* current_pte = &tbl->entries[i];
+        if (current_pte->age < oldest_age) {
+            oldest_age = current_pte->age;
+            oldest_pte = current_pte;
+            *oldest_pgnum = (uint8_t)i;
+        }
+    }
+
+    mm_page_evict(pagefile, tbl, *oldest_pgnum);
     // update mapping for requested pg
+    pte_t new_pte = mk_pte(oldest_pte->framenum);
+    set_pte(tbl, pagenum, new_pte);
     // load requested pg to frame
+    mm_page_load(pagefile, tbl, pagenum);
 }
 
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {

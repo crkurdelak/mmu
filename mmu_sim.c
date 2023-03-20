@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <io.h>
-#include <invkprxy.h>
+//#include <invkprxy.h>
 #include "mmu.h"
 #include "mmu_sim.h"
 #include "mmu_sim_cmd.h"
@@ -33,7 +33,10 @@ int main() {
 
     // while not exit:
     while (!quit) {
-        // TODO shift aging counters for all pgs
+        // shift aging counters for all pgs
+        for (int i = 0; i < PAGETABLE_SIZE; i++) {
+            pte_mkold(pagetable, i);
+        }
 
         // clear out input buffer
         memset(cmd, '\0', 255);

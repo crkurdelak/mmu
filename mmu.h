@@ -13,8 +13,6 @@
  * in the Linux kernel, described here:
  * https://www.kernel.org/doc/gorman/html/understand/understand006.html
  *
- * TODO fully document each method
- *
  * @author ckurdelak20@georgefox.edu
  */
 
