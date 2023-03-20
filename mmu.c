@@ -200,14 +200,14 @@ void pte_mkyoung(pagetable_t *tbl, pagenum_t pagenum) {
     pte_t* current_pte = &tbl->entries[pagenum];
     current_pte->R = 1;
     // put a 1 in aging counter
-    current_pte->age | 0b10000000;
+    current_pte->age |= 0b10000000;
 
 }
 
 void pte_mkold(pagetable_t *tbl, pagenum_t pagenum) {
     pte_t* current_pte = &tbl->entries[pagenum];
     current_pte->R = 0;
-    current_pte->age >> 1;
+    current_pte->age >>= 1;
 }
 
 pte_t pte_val(pagetable_t *tbl, pagenum_t pagenum) {
@@ -303,14 +303,19 @@ void aging_alg(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // look for page with smallest aging counter
     pte_t* oldest_pte = NULL;
     pagenum_t* oldest_pgnum = NULL;
-    uint16_t oldest_age = 0b10000000;
+    uint8_t oldest_age = 0b11111111;
     for (int i = 0; i < PAGETABLE_SIZE; i++) {
         pte_t* current_pte = &tbl->entries[i];
         if (current_pte->age < oldest_age) {
             oldest_age = current_pte->age;
             oldest_pte = current_pte;
-            *oldest_pgnum = (uint8_t)i;
+            *oldest_pgnum = (pagenum_t)i;
         }
+    }
+    if (oldest_pgnum == NULL) {
+        // TODO pick one at random
+        // pick random int between 0-255
+        // make it pagenum
     }
 
     mm_page_evict(pagefile, tbl, *oldest_pgnum);
