@@ -58,7 +58,7 @@ void mmu_sim_writedw(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, uint8_t va
 void mmu_sim_writez(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, int nbytes) {
     // write nbytes zeros
     for (int i = 0; i < nbytes; i++) {
-        vaddr.value ++;
         mmu_sim_write(pagefile, tbl, vaddr, 0);
+        vaddr.value ++;
     }
 }

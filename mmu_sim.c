@@ -98,7 +98,7 @@ int main() {
         // else if WRITEZ
         else if (strcmp(args[0], "WRITEZ") == 0) {
             vaddr_t vaddr = {.value = strtoul(args[1], NULL, 2)};
-            int nbytes = strtol(args[2], NULL, 10);
+            int nbytes = strtol(args[2], NULL, 2);
             // call fn
             mmu_sim_writez(pagefile, pagetable, vaddr, nbytes);
         }

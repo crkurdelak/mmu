@@ -336,7 +336,7 @@ void aging_alg(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 }
 
 frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
-    pte_t* current_pte = &(tbl->entries[pagenum]);
+    pte_t current_pte = tbl->entries[pagenum];
 
     // if page not present in memory
     if (!pte_present(tbl, pagenum)) {
@@ -344,11 +344,11 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         if(pte_none(tbl, pagenum)) {
             // search for a free frame
             framenum_t i = 0;
-            framenum_t* open_framenum = NULL;
+            int open_framenum = -1;
             bool frame_found = false;
-            while (i < PAGE_FRAMES && open_framenum == NULL) {
+            while (i < PAGE_FRAMES && open_framenum == -1) {
                 if (frametable->entries[i].occupied == 0) {
-                    open_framenum = &i;
+                    open_framenum = i;
                     frame_found = true;
                 }
                 i++;
@@ -356,7 +356,7 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
             //if there is an available frame:
             if (frame_found) {
                 //map pg to it and load pg to it
-                pte_t new_pte = mk_pte(*open_framenum);
+                pte_t new_pte = mk_pte(open_framenum);
                 set_pte(tbl, pagenum, new_pte);
                 mm_page_load(pagefile, tbl, pagenum);
             }
@@ -366,13 +366,10 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         }
     }
     else {
-        fte_t* current_fte = &frametable->entries[current_pte->framenum]; // TODO find out
-        // why
-        // this
-        // is null
+        fte_t current_fte = frametable->entries[current_pte.framenum];
 
         // if no other pg mapped there is present:
-        if (current_fte->occupied != 1) {
+        if (current_fte.occupied != 1) {
             // load requested pg to frame
             mm_page_load(pagefile, tbl, pagenum);
         }
@@ -383,7 +380,6 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
 
     // update R bit
     pte_mkyoung(tbl, pagenum);
-    // TODO put 1 in aging counter
     // return ptr to corresponding pg frame in pseudo-physical mem buffer
     return get_frame(tbl, pagenum);
 }
