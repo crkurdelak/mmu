@@ -41,10 +41,6 @@ int main() {
         // clear out input buffer
         memset(cmd, '\0', 255);
 
-        // output prompt to stdout
-        printf("mmu sim$ ");
-        fflush(stdout);
-
         // read user command from stdin
         fgets(cmd, 255, stdin);
 

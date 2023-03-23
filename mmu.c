@@ -42,9 +42,9 @@ frametable_t* frametable;
 frametable_t* frametable_alloc(){
     frametable_t* tbl = malloc(sizeof(frametable_t));
     if (tbl != NULL) {
-        tbl->entries = calloc(PAGETABLE_SIZE, sizeof(pte_t));
+        tbl->entries = calloc(PAGE_FRAMES, sizeof(fte_t));
         if (tbl->entries != NULL) {
-            tbl->size = PAGETABLE_SIZE;
+            tbl->size = PAGE_FRAMES;
         }
         else {
             free(tbl);
@@ -307,27 +307,27 @@ void aging_alg(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
     // choose best pg to evict and evict it
     // look for page with smallest aging counter
     pte_t* oldest_pte = NULL;
-    pagenum_t* oldest_pgnum = NULL;
+    int oldest_pgnum = -1;
     uint8_t oldest_age = 0b11111111;
     for (int i = 0; i < PAGETABLE_SIZE; i++) {
         pte_t* current_pte = &tbl->entries[i];
         if (current_pte->age < oldest_age) {
             oldest_age = current_pte->age;
             oldest_pte = current_pte;
-            *oldest_pgnum = (pagenum_t)i;
+            oldest_pgnum = i;
         }
     }
-    if (oldest_pgnum == NULL) {
+    if (oldest_pgnum == -1) {
         // pick random int between 0-255
         srand(pagenum);
         int upper_bound = 255;
         int lower_bound = 0;
         int num = (rand() % (upper_bound - lower_bound + 1)) + lower_bound;
         // make it pagenum
-        *oldest_pgnum = (pagenum_t)num;
+        oldest_pgnum = num;
     }
 
-    mm_page_evict(pagefile, tbl, *oldest_pgnum);
+    mm_page_evict(pagefile, tbl, (pagenum_t)oldest_pgnum);
     // update mapping for requested pg
     pte_t new_pte = mk_pte(oldest_pte->framenum);
     set_pte(tbl, pagenum, new_pte);
@@ -366,7 +366,9 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         }
     }
     else {
-        fte_t* current_fte = frametable[current_pte->framenum].entries; // TODO find out why this
+        fte_t* current_fte = &frametable->entries[current_pte->framenum]; // TODO find out
+        // why
+        // this
         // is null
 
         // if no other pg mapped there is present:
