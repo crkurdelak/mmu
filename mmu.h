@@ -260,8 +260,8 @@ void mm_page_load(char* pagefile, pagetable_t* tbl, pagenum_t pagenum);
 
 
 /**
- * Returns a pointer to the page frame containing the page, according to the specified page
- * number's corresponding page table entry.
+ * Returns a pointer to the page frame containing the specified page, according to the specified
+ * page number's corresponding page table entry.
  * @param pagefile the page file
  * @param tbl the page table
  * @param pagenum the number of the page to be located

@@ -263,6 +263,7 @@ void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
             fseek(pg_file, PAGE_SIZE * pagenum, SEEK_SET);
             // write page from frame starting at that spot
             fwrite(current_frame, 1, PAGE_SIZE, pg_file);
+            fclose(pg_file);
         }
 
         // update pte for this page (present = 0)
@@ -365,19 +366,6 @@ frame_t* pte_page(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
             aging_alg(pagefile, tbl, pagenum);
         }
     }
-    else {
-        fte_t current_fte = frametable->entries[current_pte.framenum];
-
-        // if no other pg mapped there is present:
-        if (current_fte.occupied != 1) {
-            // load requested pg to frame
-            mm_page_load(pagefile, tbl, pagenum);
-        }
-        else {
-            aging_alg(pagefile, tbl, pagenum);
-        }
-    }
-
     // update R bit
     pte_mkyoung(tbl, pagenum);
     // return ptr to corresponding pg frame in pseudo-physical mem buffer
