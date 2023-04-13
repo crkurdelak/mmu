@@ -258,7 +258,7 @@ void mm_page_evict(char* pagefile, pagetable_t* tbl, pagenum_t pagenum) {
         // if modified, write back to disk
         if (pte_dirty(tbl, pagenum)) {
             // open file
-            FILE *pg_file = fopen(pagefile, "wb");
+            FILE *pg_file = fopen(pagefile, "rb+");
             // seek to correct pg num
             fseek(pg_file, PAGE_SIZE * pagenum, SEEK_SET);
             // write page from frame starting at that spot
