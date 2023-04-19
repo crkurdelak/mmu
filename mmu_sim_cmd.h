@@ -7,9 +7,6 @@
 
 #ifndef MMU_NEW_MMU_SIM_CMD_H
 #define MMU_NEW_MMU_SIM_CMD_H
-
-#endif //MMU_NEW_MMU_SIM_CMD_H
-
 #include "mmu.h"
 
 /**
@@ -66,4 +63,4 @@ void mmu_sim_writedw(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, uint8_t va
  */
 void mmu_sim_writez(char *pagefile, pagetable_t *tbl, vaddr_t vaddr, int nbytes);
 
-
+#endif //MMU_NEW_MMU_SIM_CMD_H
