@@ -15,5 +15,4 @@
  */
 void get_args(char* cmd, char* args_array[]);
 
-
 #endif //MMU_NEW_MMU_SIM_H
